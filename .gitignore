@@ -1,0 +1,13 @@
+node_modules
+dist
+.vercel
+.idea
+.vscode
+.DS_Store
+*.ai
+*.log
+*.pdf
+*.psd
+*.sublime*
+npm-debug.*
+Thumbs.db
