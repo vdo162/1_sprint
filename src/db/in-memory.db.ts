@@ -35,15 +35,5 @@ export const db: { videos: Video[] } = {
       publicationDate: new Date(),
       availableResolutions: [Resolutions.P720, Resolutions.P1080],
     },
-    {
-      id: 5,
-      title: "Test",
-      author: "Test",
-      canBeDownloaded: true,
-      minAgeRestriction: 18,
-      createdAt: new Date(),
-      publicationDate: new Date(),
-      availableResolutions: [Resolutions.P720, Resolutions.P1080],
-    },
   ],
 };
