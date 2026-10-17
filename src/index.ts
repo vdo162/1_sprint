@@ -1,30 +1,13 @@
-import express from 'express';
-import {productsRouter} from "./routes/products-router";
-import {runDb} from "./repositories/db";
+import express from "express";
+import { setupApp } from "./setup-app";
 
-const port = process.env.PORT || 5000
+// создание приложения
+const app = express();
+setupApp(app);
 
-export const app = express()
+const PORT = process.env.PORT || 5001;
 
-app.use(express.json())
-
-export const HTTP_STATUSES = {
-    OK_200: 200,
-    CREATED_201: 201,
-    NO_CONTENT_204: 204,
-
-    BAD_REQUEST_400: 400,
-    NOT_FOUND_404: 404
-}
-
-app.use('/products', productsRouter)
-
-const startApp = async () => {
-    await runDb()
-    app.listen(port, () => {
-        console.log(`Example app listening on port http://localhost:${port}`);
-    });
-}
-
-startApp()
-
+// ф-ия listen - запускает сервер и начинает прослушивать входящие запросы на указанном порту.
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}`);
+});
