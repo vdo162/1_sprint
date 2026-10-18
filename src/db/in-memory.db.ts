@@ -1,39 +1,20 @@
-import { Video, Resolutions } from "../videos/types/video";
+import { Blogger } from '../bloggers/types/blogger';
+import { Post } from '../posts/types/post';
 
-// Простое хранилище в памяти вместо настоящей базы данных.
-// Данные живут только пока запущен сервер и сбрасываются при перезапуске.
-
-export const db: { videos: Video[] } = {
-  videos: [
+export const db = {
+  bloggers: <Blogger[]>[
     {
-      id: 1,
-      title: "Введение в TypeScript за 10 минут",
-      author: "Иван Иванов",
-      canBeDownloaded: true,
-      minAgeRestriction: null,
-      createdAt: new Date(),
-      publicationDate: new Date(),
-      availableResolutions: [Resolutions.P144],
+      id: '1',
+      name: 'Tom Rider',
+      description: 'Tom Rider cool',
+      websiteUrl: 'tom.rider@example.com',
     },
     {
-      id: 2,
-      title: "Как правильно готовить пасту карбонара",
-      author: "Шеф-повар Антонио",
-      canBeDownloaded: true,
-      minAgeRestriction: 12,
-      createdAt: new Date(),
-      publicationDate: new Date(),
-      availableResolutions: [Resolutions.P480],
-    },
-    {
-      id: 3,
-      title: "Обзор новинок технологий 2026",
-      author: "ТехноБлог",
-      canBeDownloaded: true,
-      minAgeRestriction: 18,
-      createdAt: new Date(),
-      publicationDate: new Date(),
-      availableResolutions: [Resolutions.P720, Resolutions.P1080],
+      id: '2',
+      name: 'Bob',
+      description: 'Off road',
+      websiteUrl: 'bob@example.com',
     },
   ],
+  posts: <Post[]>[],
 };
