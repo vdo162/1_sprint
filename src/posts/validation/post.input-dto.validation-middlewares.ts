@@ -23,9 +23,11 @@ const contentValidation = body('content')
 
 const bloggerIdValidation = body('blogId')
   .exists()
-  .withMessage('blogId is required')
+  .withMessage('BlogId is required')
   .isString()
-  .withMessage('blogId must be string');
+  .withMessage('BlogId must be a string')
+  .isMongoId()
+  .withMessage('Incorrect format of ObjectId');
 
 export const postInputDtoValidation = [
   titleValidation,
