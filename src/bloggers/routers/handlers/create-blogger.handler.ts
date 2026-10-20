@@ -3,17 +3,25 @@ import { BloggersInputDto } from '../../dto/bloggers.input.dto';
 import { HttpStatus } from '../../../core/types/http-statuses';
 import { Blogger } from '../../types/blogger';
 import { bloggersRepository } from '../../repositories/bloggers.repository';
+import { mapBloggerInputDtoToBlogger } from '../mappers/map-blogger-input-dto-to-blogger.util';
+import { mapToBloggerViewModel } from '../mappers/map-to-blogger-view-model.util';
 
-export function createBloggerHandler(
+export async function createBloggerHandler(
   req: Request<{}, {}, BloggersInputDto>,
   res: Response,
 ) {
-  const newBlogger: Omit<Blogger, 'id'> = {
-    name: req.body.name,
-    description: req.body.description,
-    websiteUrl: req.body.websiteUrl,
-  };
+  try {
+    // Проекция DTO -> доменная модель; дату создания добавляем здесь.
+    const newBlogger: Blogger = {
+      ...mapBloggerInputDtoToBlogger(req.body),
+      isMembership: false,
+      createdAt: new Date(),
+    };
 
-  const createdBlogger = bloggersRepository.create(newBlogger);
-  res.status(HttpStatus.Created).send(createdBlogger);
+    const createdBlogger = await bloggersRepository.create(newBlogger);
+    const bloggerViewModel = mapToBloggerViewModel(createdBlogger);
+    res.status(HttpStatus.Created).send(bloggerViewModel);
+  } catch {
+    res.sendStatus(HttpStatus.InternalServerError);
+  }
 }

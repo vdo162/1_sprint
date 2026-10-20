@@ -5,32 +5,39 @@ import { HttpStatus } from '../../../core/types/http-statuses';
 import { createErrorsMessages } from '../../../core/middlewares/validation/input-validation-result.middleware';
 import { postsRepository } from '../../repositories/posts.repository';
 import { Post } from '../../types/post';
+import { mapPostInputDtoToPost } from '../mappers/map-post-input-dto-to-post.util';
+import { mapToPostViewModel } from '../mappers/map-to-post-view-model.util';
 
-export function createPostHandler(
+export async function createPostHandler(
   req: Request<{}, {}, PostInputDto>,
   res: Response,
 ) {
-  const blogger = bloggersRepository.findById(req.body.blogId);
+  try {
+    const bloggerId = req.body.blogId;
+    const blogger = await bloggersRepository.findById(bloggerId);
 
-  if (!blogger) {
-    res
-      .status(HttpStatus.BadRequest)
-      .send(
-        createErrorsMessages([
-          { field: 'blogId', message: 'Blogger not found' },
-        ]),
-      );
-    return;
+    if (!blogger) {
+      res
+        .status(HttpStatus.BadRequest)
+        .send(
+          createErrorsMessages([
+            { field: 'blogId', message: 'Blogger not found' },
+          ]),
+        );
+
+      return;
+    }
+
+    const newPost: Post = {
+      ...mapPostInputDtoToPost(req.body, blogger),
+      createdAt: new Date(),
+    };
+
+    const createdPost = await postsRepository.create(newPost);
+    const postViewModel = mapToPostViewModel(createdPost);
+
+    res.status(HttpStatus.Created).send(postViewModel);
+  } catch {
+    res.sendStatus(HttpStatus.InternalServerError);
   }
-
-  const newPost: Omit<Post, 'id'> = {
-    title: req.body.title,
-    shortDescription: req.body.shortDescription,
-    content: req.body.content,
-    blogId: blogger.id,
-    blogName: blogger.name,
-  };
-
-  const createdPost = postsRepository.create(newPost);
-  res.status(HttpStatus.Created).send(createdPost);
 }

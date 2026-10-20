@@ -3,21 +3,29 @@ import { BloggersInputDto } from '../../dto/bloggers.input.dto';
 import { HttpStatus } from '../../../core/types/http-statuses';
 import { createErrorsMessages } from '../../../core/middlewares/validation/input-validation-result.middleware';
 import { bloggersRepository } from '../../repositories/bloggers.repository';
+import { mapBloggerInputDtoToBlogger } from '../mappers/map-blogger-input-dto-to-blogger.util';
 
-export function updateBloggerHandler(
+export async function updateBloggerHandler(
   req: Request<{ id: string }, {}, BloggersInputDto>,
   res: Response,
 ) {
-  const isUpdated = bloggersRepository.update(req.params.id, req.body);
+  try {
+    const id = req.params.id;
+    const blogger = await bloggersRepository.findById(id);
 
-  if (!isUpdated) {
-    res
-      .status(HttpStatus.NotFound)
-      .send(
-        createErrorsMessages([{ field: 'id', message: 'Blogger not found' }]),
-      );
-    return;
+    if (!blogger) {
+      res
+        .status(HttpStatus.NotFound)
+        .send(
+          createErrorsMessages([{ field: 'id', message: 'Blogger not found' }]),
+        );
+      return;
+    }
+
+    // В репозиторий передаём доменный объект (проекцию DTO), а не сам DTO.
+    await bloggersRepository.update(id, mapBloggerInputDtoToBlogger(req.body));
+    res.sendStatus(HttpStatus.NoContent);
+  } catch {
+    res.sendStatus(HttpStatus.InternalServerError);
   }
-
-  res.sendStatus(HttpStatus.NoContent);
 }
