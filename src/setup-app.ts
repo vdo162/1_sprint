@@ -8,7 +8,6 @@ import { TESTING_PATH } from './testing/constants/testing.paths';
 import { HttpStatus } from './core/types/http-statuses';
 
 export const setupApp = (app: Express) => {
-  // express.json() парсит JSON из тела запроса и кладёт его в req.body.
   app.use(express.json());
 
   // Health-check: простой ответ, что сервер жив.
@@ -16,7 +15,6 @@ export const setupApp = (app: Express) => {
     res.status(HttpStatus.Ok).send('Hello world!');
   });
 
-  // Каждый модуль подключается по своему базовому пути.
   app.use(BLOGGERS_PATH, bloggersRouter);
   app.use(POSTS_PATH, postsRouter);
   app.use(TESTING_PATH, testingRouter);

@@ -1,45 +1,35 @@
 import { Post } from '../types/post';
-import { db } from '../../db/in-memory.db';
+import { postCollection } from '../../db/collections';
+import { ObjectId, WithId } from 'mongodb';
 
 export const postsRepository = {
-  findAll(): Post[] {
-    return db.posts;
+  async findAll(): Promise<WithId<Post>[]> {
+    return postCollection.find().toArray();
   },
 
-  findById(id: string): Post | null {
-    return db.posts.find((p) => p.id === id) ?? null;
+  async findById(id: string): Promise<WithId<Post> | null> {
+    return postCollection.findOne({ _id: new ObjectId(id) });
   },
 
-  create(newPost: Omit<Post, 'id'>): Post {
-    const lastPost = db.posts[db.posts.length - 1];
-    const created: Post = {
-      id: String(lastPost ? +lastPost.id + 1 : 1),
-      ...newPost,
-    };
-
-    db.posts.push(created);
-    return created;
+  async create(newPost: Post): Promise<WithId<Post>> {
+    const insertResult = await postCollection.insertOne(newPost);
+    return { ...newPost, _id: insertResult.insertedId };
   },
 
-  update(id: string, post: Omit<Post, 'id'>): boolean {
-    const index = db.posts.findIndex((b) => b.id === id);
+  async update(id: string, post: Omit<Post, 'createdAt'>): Promise<boolean> {
+    const updateResult = await postCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: post },
+    );
 
-    if (index === -1) {
-      return false;
-    }
-
-    db.posts[index] = { ...db.posts[index], ...post };
-    return true;
+    return updateResult.matchedCount > 0;
   },
 
-  delete(id: string): boolean {
-    const index = db.posts.findIndex((p) => p.id === id);
+  async delete(id: string): Promise<boolean> {
+    const deleteResult = await postCollection.deleteOne({
+      _id: new ObjectId(id),
+    });
 
-    if (index === -1) {
-      return false;
-    }
-
-    db.posts.splice(index, 1);
-    return true;
+    return deleteResult.deletedCount > 0;
   },
 };

@@ -1,45 +1,38 @@
 import { Blogger } from '../types/blogger';
-import { db } from '../../db/in-memory.db';
+import { ObjectId, WithId } from 'mongodb';
+import { bloggerCollection } from '../../db/collections';
 
 export const bloggersRepository = {
-  findAll(): Blogger[] {
-    return db.bloggers;
+  async findAll(): Promise<WithId<Blogger>[]> {
+    return bloggerCollection.find().toArray();
   },
 
-  findById(id: string): Blogger | null {
-    return db.bloggers.find((b) => b.id === id) ?? null;
+  async findById(id: string): Promise<WithId<Blogger> | null> {
+    return bloggerCollection.findOne({ _id: new ObjectId(id) });
   },
 
-  create(newBlogger: Omit<Blogger, 'id'>): Blogger {
-    const lastBlogger = db.bloggers[db.bloggers.length - 1];
-    const created: Blogger = {
-      id: String(lastBlogger ? +lastBlogger.id + 1 : 1),
-      ...newBlogger,
-    };
-
-    db.bloggers.push(created);
-    return created;
+  async create(newBlogger: Blogger): Promise<WithId<Blogger>> {
+    const insertResult = await bloggerCollection.insertOne(newBlogger);
+    return { ...newBlogger, _id: insertResult.insertedId };
   },
 
-  update(id: string, blogger: Omit<Blogger, 'id'>): boolean {
-    const index = db.bloggers.findIndex((b) => b.id === id);
+  async update(
+    id: string,
+    blogger: Omit<Blogger, 'isMembership' | 'createdAt'>,
+  ): Promise<boolean> {
+    const updateResult = await bloggerCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: blogger },
+    );
 
-    if (index === -1) {
-      return false;
-    }
-
-    db.bloggers[index] = { ...db.bloggers[index], ...blogger };
-    return true;
+    return updateResult.matchedCount > 0;
   },
 
-  delete(id: string): boolean {
-    const index = db.bloggers.findIndex((b) => b.id === id);
+  async delete(id: string): Promise<boolean> {
+    const deleteResult = await bloggerCollection.deleteOne({
+      _id: new ObjectId(id),
+    });
 
-    if (index === -1) {
-      return false;
-    }
-
-    db.bloggers.splice(index, 1);
-    return true;
+    return deleteResult.deletedCount > 0;
   },
 };

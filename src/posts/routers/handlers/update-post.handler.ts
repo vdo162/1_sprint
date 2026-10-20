@@ -1,46 +1,43 @@
 import { Request, Response } from 'express';
 import { HttpStatus } from '../../../core/types/http-statuses';
 import { createErrorsMessages } from '../../../core/middlewares/validation/input-validation-result.middleware';
-import { Post } from '../../types/post';
 import { postsRepository } from '../../repositories/posts.repository';
 import { bloggersRepository } from '../../../bloggers/repositories/bloggers.repository';
 import { PostInputDto } from '../../dto/post.input.dto';
+import { mapPostInputDtoToPost } from '../mappers/map-post-input-dto-to-post.util';
 
-export function updatePostHandler(
+export async function updatePostHandler(
   req: Request<{ id: string }, {}, PostInputDto>,
   res: Response,
 ) {
-  const blogger = bloggersRepository.findById(req.body.blogId);
+  try {
+    const bloggerId = req.body.blogId;
+    const blogger = await bloggersRepository.findById(bloggerId);
 
-  if (!blogger) {
-    res
-      .status(HttpStatus.BadRequest)
-      .send(
-        createErrorsMessages([
-          { field: 'blogId', message: 'Blogger not found' },
-        ]),
-      );
-    return;
+    if (!blogger) {
+      res
+        .status(HttpStatus.NotFound)
+        .send(
+          createErrorsMessages([{ field: 'id', message: 'Blogger not found' }]),
+        );
+      return;
+    }
+
+    const id = req.params.id;
+    const post = await postsRepository.findById(id);
+
+    if (!post) {
+      res
+        .status(HttpStatus.NotFound)
+        .send(
+          createErrorsMessages([{ field: 'id', message: 'Post not found' }]),
+        );
+      return;
+    }
+
+    await postsRepository.update(id, mapPostInputDtoToPost(req.body, blogger));
+    res.sendStatus(HttpStatus.NoContent);
+  } catch {
+    res.sendStatus(HttpStatus.InternalServerError);
   }
-
-  const updatedPost: Omit<Post, 'id'> = {
-    title: req.body.title,
-    shortDescription: req.body.shortDescription,
-    content: req.body.content,
-    blogId: blogger.id,
-    blogName: blogger.name,
-  };
-
-  const isUpdated = postsRepository.update(req.params.id, updatedPost);
-
-  if (!isUpdated) {
-    res
-      .status(HttpStatus.NotFound)
-      .send(
-        createErrorsMessages([{ field: 'id', message: 'Blogger not found' }]),
-      );
-    return;
-  }
-
-  res.sendStatus(HttpStatus.NoContent);
 }

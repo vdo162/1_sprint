@@ -3,20 +3,26 @@ import { HttpStatus } from '../../../core/types/http-statuses';
 import { createErrorsMessages } from '../../../core/middlewares/validation/input-validation-result.middleware';
 import { bloggersRepository } from '../../repositories/bloggers.repository';
 
-export function deleteBloggerHandler(
+export async function deleteBloggerHandler(
   req: Request<{ id: string }>,
   res: Response,
 ) {
-  const isDeleted = bloggersRepository.delete(req.params.id);
+  try {
+    const id = req.params.id;
+    const isDeleted = await bloggersRepository.delete(id);
 
-  if (!isDeleted) {
-    res
-      .status(HttpStatus.NotFound)
-      .send(
-        createErrorsMessages([{ field: 'id', message: 'Blogger not found' }]),
-      );
-    return;
+    if (!isDeleted) {
+      res
+        .status(HttpStatus.NotFound)
+        .send(
+          createErrorsMessages([{ field: 'id', message: 'Blogger not found' }]),
+        );
+
+      return;
+    }
+
+    res.sendStatus(HttpStatus.NoContent);
+  } catch {
+    res.sendStatus(HttpStatus.InternalServerError);
   }
-
-  res.sendStatus(HttpStatus.NoContent);
 }
