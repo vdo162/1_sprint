@@ -1,7 +1,7 @@
 import { WithId } from 'mongodb';
-import { Blogger } from '../../../bloggers/types/blogger';
-import { PostInputDto } from '../../dto/post.input.dto';
-import { Post } from '../../types/post';
+import { Blogger } from '../../../bloggers/domain/blogger';
+import { PostInputDto } from '../input/post-input.dto';
+import { Post } from '../../domain/post';
 
 export function mapPostInputDtoToPost(
   dto: PostInputDto,

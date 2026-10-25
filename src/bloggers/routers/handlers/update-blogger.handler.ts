@@ -1,31 +1,22 @@
 import { Request, Response } from 'express';
-import { BloggersInputDto } from '../../dto/bloggers.input.dto';
+import { BloggerInputDto } from '../input/blogger-input.dto';
 import { HttpStatus } from '../../../core/types/http-statuses';
-import { createErrorsMessages } from '../../../core/middlewares/validation/input-validation-result.middleware';
-import { bloggersRepository } from '../../repositories/bloggers.repository';
-import { mapBloggerInputDtoToBlogger } from '../mappers/map-blogger-input-dto-to-blogger.util';
+import { mapBloggerInputToDto } from '../mappers/map-blogger-input-to-dto.util';
+import { Unsanitized } from '../../../core/types/unsanitized.input';
+import { bloggersService } from '../../application/bloggers.service';
+import { errorsHandler } from '../../../core/exceptions/errors.handler';
 
 export async function updateBloggerHandler(
-  req: Request<{ id: string }, {}, BloggersInputDto>,
+  req: Request<{ id: string }, {}, Unsanitized<BloggerInputDto>>,
   res: Response,
 ) {
   try {
     const id = req.params.id;
-    const blogger = await bloggersRepository.findById(id);
 
-    if (!blogger) {
-      res
-        .status(HttpStatus.NotFound)
-        .send(
-          createErrorsMessages([{ field: 'id', message: 'Blogger not found' }]),
-        );
-      return;
-    }
+    await bloggersService.update(id, mapBloggerInputToDto(req.body));
 
-    // В репозиторий передаём доменный объект (проекцию DTO), а не сам DTO.
-    await bloggersRepository.update(id, mapBloggerInputDtoToBlogger(req.body));
     res.sendStatus(HttpStatus.NoContent);
-  } catch {
-    res.sendStatus(HttpStatus.InternalServerError);
+  } catch (e: unknown) {
+    errorsHandler(e, res);
   }
 }

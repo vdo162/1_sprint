@@ -1,10 +1,31 @@
-import { Blogger } from '../types/blogger';
+import { Blogger } from '../domain/blogger';
 import { ObjectId, WithId } from 'mongodb';
 import { bloggerCollection } from '../../db/collections';
+import { BloggerQueryInput } from '../routers/input/blogger-query.input';
 
 export const bloggersRepository = {
-  async findAll(): Promise<WithId<Blogger>[]> {
-    return bloggerCollection.find().toArray();
+  async findMany(
+    queryInput: BloggerQueryInput,
+  ): Promise<{ items: WithId<Blogger>[]; totalCount: number }> {
+    const { pageNumber, pageSize, sortBy, sortDirection, searchNameTerm } =
+      queryInput;
+
+    const skip = (pageNumber - 1) * pageSize;
+    const filter: any = {};
+    if (searchNameTerm) {
+      filter.name = { $regex: searchNameTerm, $options: 'i' };
+    }
+
+    const items = await bloggerCollection
+      .find(filter)
+      .sort({ [sortBy]: sortDirection })
+      .skip(skip)
+      .limit(pageSize)
+      .toArray();
+
+    const totalCount = await bloggerCollection.countDocuments(filter);
+
+    return { items, totalCount };
   },
 
   async findById(id: string): Promise<WithId<Blogger> | null> {

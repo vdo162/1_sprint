@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { HttpStatus } from '../../../core/types/http-statuses';
-import { createErrorsMessages } from '../../../core/middlewares/validation/input-validation-result.middleware';
-import { bloggersRepository } from '../../repositories/bloggers.repository';
-import { mapToBloggerViewModel } from '../mappers/map-to-blogger-view-model.util';
+import { mapToBloggerOutput } from '../mappers/map-to-blogger-output.util';
+import { bloggersService } from '../../application/bloggers.service';
+import { errorsHandler } from '../../../core/exceptions/errors.handler';
 
 export async function getBloggerHandler(
   req: Request<{ id: string }>,
@@ -10,21 +10,13 @@ export async function getBloggerHandler(
 ) {
   try {
     const id = req.params.id;
-    const blogger = await bloggersRepository.findById(id);
 
-    if (!blogger) {
-      res
-        .status(HttpStatus.NotFound)
-        .send(
-          createErrorsMessages([{ field: 'id', message: 'Blogger not found' }]),
-        );
+    const blogger = await bloggersService.findById(id);
 
-      return;
-    }
+    const bloggerOutput = mapToBloggerOutput(blogger);
 
-    const bloggerViewModel = mapToBloggerViewModel(blogger);
-    res.status(HttpStatus.Ok).send(bloggerViewModel);
-  } catch {
-    res.sendStatus(HttpStatus.InternalServerError);
+    res.status(HttpStatus.Ok).send(bloggerOutput);
+  } catch (e: unknown) {
+    errorsHandler(e, res);
   }
 }

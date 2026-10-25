@@ -1,16 +1,27 @@
 import { Request, Response } from 'express';
-import { postsRepository } from '../../repositories/posts.repository';
+import { mapToPostListPaginatedOutput } from '../mappers/map-to-post-list-paginated-output.util';
+import { PostQueryInput } from '../input/post-query.input';
+import { postsService } from '../../application/posts.service';
+import { errorsHandler } from '../../../core/exceptions/errors.handler';
 import { HttpStatus } from '../../../core/types/http-statuses';
-import { mapToPostViewModel } from '../mappers/map-to-post-view-model.util';
 
-export async function getPostListHandler(req: Request, res: Response) {
+export async function getPostListHandler(
+  req: Request<{}, {}, {}, PostQueryInput>,
+  res: Response,
+) {
   try {
-    const posts = await postsRepository.findAll();
+    const queryInput = req.query;
 
-    // Наружу отдаём view-model, а не «сырой» документ из БД.
-    const postViewModels = posts.map(mapToPostViewModel);
-    res.send(postViewModels);
-  } catch {
-    res.sendStatus(HttpStatus.InternalServerError);
+    const { items, totalCount } = await postsService.findMany(queryInput);
+
+    const postListOutput = mapToPostListPaginatedOutput(items, {
+      pageNumber: queryInput.pageNumber,
+      pageSize: queryInput.pageSize,
+      totalCount,
+    });
+
+    res.status(HttpStatus.Ok).send(postListOutput);
+  } catch (e: unknown) {
+    errorsHandler(e, res);
   }
 }

@@ -1,43 +1,28 @@
 import { Request, Response } from 'express';
-import { PostInputDto } from '../../dto/post.input.dto';
-import { bloggersRepository } from '../../../bloggers/repositories/bloggers.repository';
+import { PostInputDtoWithBlogId } from '../input/post-input.dto';
 import { HttpStatus } from '../../../core/types/http-statuses';
-import { createErrorsMessages } from '../../../core/middlewares/validation/input-validation-result.middleware';
-import { postsRepository } from '../../repositories/posts.repository';
-import { Post } from '../../types/post';
-import { mapPostInputDtoToPost } from '../mappers/map-post-input-dto-to-post.util';
-import { mapToPostViewModel } from '../mappers/map-to-post-view-model.util';
+import { mapToPostOutput } from '../mappers/map-to-post-output.util';
+import { Unsanitized } from '../../../core/types/unsanitized.input';
+import { postsService } from '../../application/posts.service';
+import { mapCreatePostInputToDto } from '../mappers/map-post-input-to-dto.util';
+import { errorsHandler } from '../../../core/exceptions/errors.handler';
 
 export async function createPostHandler(
-  req: Request<{}, {}, PostInputDto>,
+  req: Request<{}, {}, Unsanitized<PostInputDtoWithBlogId>>,
   res: Response,
 ) {
   try {
     const bloggerId = req.body.blogId;
-    const blogger = await bloggersRepository.findById(bloggerId);
 
-    if (!blogger) {
-      res
-        .status(HttpStatus.BadRequest)
-        .send(
-          createErrorsMessages([
-            { field: 'blogId', message: 'Blogger not found' },
-          ]),
-        );
+    const createdPost = await postsService.create(
+      bloggerId,
+      mapCreatePostInputToDto(req.body),
+    );
 
-      return;
-    }
+    const postOutput = mapToPostOutput(createdPost);
 
-    const newPost: Post = {
-      ...mapPostInputDtoToPost(req.body, blogger),
-      createdAt: new Date(),
-    };
-
-    const createdPost = await postsRepository.create(newPost);
-    const postViewModel = mapToPostViewModel(createdPost);
-
-    res.status(HttpStatus.Created).send(postViewModel);
-  } catch {
-    res.sendStatus(HttpStatus.InternalServerError);
+    res.status(HttpStatus.Created).send(postOutput);
+  } catch (e: unknown) {
+    errorsHandler(e, res);
   }
 }

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { HttpStatus } from '../../../core/types/http-statuses';
-import { createErrorsMessages } from '../../../core/middlewares/validation/input-validation-result.middleware';
-import { postsRepository } from '../../repositories/posts.repository';
+import { postsService } from '../../application/posts.service';
+import { errorsHandler } from '../../../core/exceptions/errors.handler';
 
 export async function deletePostHandler(
   req: Request<{ id: string }>,
@@ -9,20 +9,11 @@ export async function deletePostHandler(
 ) {
   try {
     const id = req.params.id;
-    const isDeleted = await postsRepository.delete(id);
 
-    if (!isDeleted) {
-      res
-        .status(HttpStatus.NotFound)
-        .send(
-          createErrorsMessages([{ field: 'id', message: 'Post not found' }]),
-        );
-
-      return;
-    }
+    await postsService.delete(id);
 
     res.sendStatus(HttpStatus.NoContent);
-  } catch {
-    res.sendStatus(HttpStatus.InternalServerError);
+  } catch (e: unknown) {
+    errorsHandler(e, res);
   }
 }

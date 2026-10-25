@@ -1,15 +1,27 @@
 import { Request, Response } from 'express';
+import { mapToBloggerListPaginatedOutput } from '../mappers/map-to-blogger-list-paginated-output.util';
+import { BloggerQueryInput } from '../input/blogger-query.input';
+import { bloggersService } from '../../application/bloggers.service';
+import { errorsHandler } from '../../../core/exceptions/errors.handler';
 import { HttpStatus } from '../../../core/types/http-statuses';
-import { bloggersRepository } from '../../repositories/bloggers.repository';
-import { mapToBloggerViewModel } from '../mappers/map-to-blogger-view-model.util';
 
-export async function getBloggerListHandler(req: Request, res: Response) {
+export async function getBloggerListHandler(
+  req: Request<{ id: string }, {}, {}, BloggerQueryInput>,
+  res: Response,
+) {
   try {
-    const bloggers = await bloggersRepository.findAll();
-    // Наружу отдаём view-model, а не «сырой» документ из БД.
-    const bloggerViewModels = bloggers.map(mapToBloggerViewModel);
-    res.send(bloggerViewModels);
-  } catch {
-    res.sendStatus(HttpStatus.InternalServerError);
+    const queryInput = req.query;
+
+    const { items, totalCount } = await bloggersService.findMany(queryInput);
+
+    const postListOutput = mapToBloggerListPaginatedOutput(items, {
+      pageNumber: queryInput.pageNumber,
+      pageSize: queryInput.pageSize,
+      totalCount,
+    });
+
+    res.status(HttpStatus.Ok).send(postListOutput);
+  } catch (e: unknown) {
+    errorsHandler(e, res);
   }
 }

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { HttpStatus } from '../../../core/types/http-statuses';
-import { createErrorsMessages } from '../../../core/middlewares/validation/input-validation-result.middleware';
-import { bloggersRepository } from '../../repositories/bloggers.repository';
+import { bloggersService } from '../../application/bloggers.service';
+import { errorsHandler } from '../../../core/exceptions/errors.handler';
 
 export async function deleteBloggerHandler(
   req: Request<{ id: string }>,
@@ -9,20 +9,11 @@ export async function deleteBloggerHandler(
 ) {
   try {
     const id = req.params.id;
-    const isDeleted = await bloggersRepository.delete(id);
 
-    if (!isDeleted) {
-      res
-        .status(HttpStatus.NotFound)
-        .send(
-          createErrorsMessages([{ field: 'id', message: 'Blogger not found' }]),
-        );
-
-      return;
-    }
+    await bloggersService.delete(id);
 
     res.sendStatus(HttpStatus.NoContent);
-  } catch {
-    res.sendStatus(HttpStatus.InternalServerError);
+  } catch (e: unknown) {
+    errorsHandler(e, res);
   }
 }

@@ -1,6 +1,6 @@
 import { Collection, Db } from 'mongodb';
-import { Blogger } from '../bloggers/types/blogger';
-import { Post } from '../posts/types/post';
+import { Blogger } from '../bloggers/domain/blogger';
+import { Post } from '../posts/domain/post';
 
 export const BLOGGER_COLLECTION_NAME = 'bloggers';
 export const POST_COLLECTION_NAME = 'posts';
