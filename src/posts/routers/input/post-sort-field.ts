@@ -9,9 +9,3 @@ export enum MappedPostSortField {
   Title = 'title',
   BlogName = 'blog.name',
 }
-
-export const postSortFieldMapper: Record<PostSortField, MappedPostSortField> = {
-  [PostSortField.CreatedAt]: MappedPostSortField.CreatedAt,
-  [PostSortField.Title]: MappedPostSortField.Title,
-  [PostSortField.BlogName]: MappedPostSortField.BlogName,
-};

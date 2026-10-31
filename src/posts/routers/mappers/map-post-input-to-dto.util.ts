@@ -1,23 +1,23 @@
-import { PostInputDto, PostInputDtoWithBlogId } from '../input/post-input.dto';
-import { Unsanitized } from '../../../core/types/unsanitized.input';
+import { PostCreateDto, PostCreateInput } from '../input/post-create.dto';
+import { PostUpdateDto, PostUpdateInput } from '../input/post-update.dto';
 
 export function mapCreatePostInputToDto(
-  dto: Unsanitized<PostInputDto>,
-): PostInputDto {
+  postInput: PostCreateInput,
+): PostCreateDto {
   return {
-    title: dto.title,
-    shortDescription: dto.shortDescription,
-    content: dto.content,
+    title: postInput.title,
+    shortDescription: postInput.shortDescription,
+    content: postInput.content,
   };
 }
 
 export function mapUpdatePostInputToDto(
-  dto: Unsanitized<PostInputDtoWithBlogId>,
-): PostInputDtoWithBlogId {
+  postInput: PostUpdateInput,
+): PostUpdateDto {
   return {
-    title: dto.title,
-    shortDescription: dto.shortDescription,
-    content: dto.content,
-    blogId: dto.blogId,
+    title: postInput.title,
+    shortDescription: postInput.shortDescription,
+    content: postInput.content,
+    blogId: postInput.blogId,
   };
 }

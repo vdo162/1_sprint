@@ -2,14 +2,14 @@ import { ValidationError, validationResult } from 'express-validator';
 import { NextFunction, Request, Response } from 'express';
 import {
   ValidationErrorType,
-  ValidationErrorDto,
+  ValidationErrorsMessages,
 } from '../../types/validation-error';
 import { HttpStatus } from '../../types/http-statuses';
 
 // Оборачивает список ошибок в единый формат ответа: { errorsMessages: [...] }.
 export const createErrorsMessages = (
   errors: ValidationErrorType[],
-): ValidationErrorDto => {
+): ValidationErrorsMessages => {
   return { errorsMessages: errors };
 };
 

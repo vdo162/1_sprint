@@ -1,26 +1,22 @@
 import { Request, Response } from 'express';
-import { mapToPostListPaginatedOutput } from '../mappers/map-to-post-list-paginated-output.util';
-import { PostQueryInput } from '../input/post-query.input';
-import { postsService } from '../../application/posts.service';
+import { PostQueryParams } from '../input/post-query-params';
 import { errorsHandler } from '../../../core/exceptions/errors.handler';
 import { HttpStatus } from '../../../core/types/http-statuses';
+import { postsQueryRepository } from '../../repositories/posts.query.repository';
+import { mapPostsQueryParams } from '../mappers/map-posts-query-params.util';
 
 export async function getPostListHandler(
-  req: Request<{}, {}, {}, PostQueryInput>,
+  req: Request<{}, {}, {}, PostQueryParams>,
   res: Response,
 ) {
   try {
-    const queryInput = req.query;
+    const queryParams = req.query;
 
-    const { items, totalCount } = await postsService.findMany(queryInput);
+    const posts = await postsQueryRepository.findMany(
+      mapPostsQueryParams(queryParams),
+    );
 
-    const postListOutput = mapToPostListPaginatedOutput(items, {
-      pageNumber: queryInput.pageNumber,
-      pageSize: queryInput.pageSize,
-      totalCount,
-    });
-
-    res.status(HttpStatus.Ok).send(postListOutput);
+    res.status(HttpStatus.Ok).send(posts);
   } catch (e: unknown) {
     errorsHandler(e, res);
   }

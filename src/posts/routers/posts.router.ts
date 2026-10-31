@@ -2,7 +2,6 @@ import { RequestHandler, Router } from 'express';
 import { inputValidationResultMiddleware } from '../../core/middlewares/validation/input-validation-result.middleware';
 import { superAdminGuardMiddleware } from '../../auth/middlewares/super-admin.guard.middleware';
 import { idValidation } from '../../core/middlewares/validation/params-id.validation.middleware';
-import { postInputDtoValidation } from '../validation/post.input-dto.validation-middlewares';
 import { createPostHandler } from './handlers/create-post.handler';
 import { getPostListHandler } from './handlers/get-post-list.handler';
 import { getPostHandler } from './handlers/get-post.handler';
@@ -12,6 +11,7 @@ import { deletePostHandler } from './handlers/delete-post.handler';
 import { paginationAndSortingValidation } from '../../core/middlewares/validation/query-pagination-sorting.validation.middleware';
 import { sanitizeQueryParams } from '../../core/middlewares/validation/sanitize-query.middleware';
 import { PostSortField } from './input/post-sort-field';
+import { postInputValidation } from '../validation/post.input.validation-middlewares';
 
 export const postsRouter = Router({});
 
@@ -34,7 +34,7 @@ postsRouter
   .post(
     POSTS_ROUTES.ROOT,
     superAdminGuardMiddleware,
-    postInputDtoValidation,
+    postInputValidation,
     inputValidationResultMiddleware,
     createPostHandler,
   )
@@ -43,7 +43,7 @@ postsRouter
     POSTS_ROUTES.BY_ID,
     superAdminGuardMiddleware,
     idValidation,
-    postInputDtoValidation,
+    postInputValidation,
     inputValidationResultMiddleware,
     updatePostHandler,
   )

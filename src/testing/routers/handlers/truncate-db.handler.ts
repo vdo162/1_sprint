@@ -1,13 +1,10 @@
 import { Request, Response } from 'express';
 import { HttpStatus } from '../../../core/types/http-statuses';
-import { getAllCollections } from '../../../db/collections';
+import { db } from '../../../db';
 
 export async function truncateDbHandler(req: Request, res: Response) {
   try {
-    // Полностью очищаем все коллекции (используется в тестах).
-    await Promise.all(
-      getAllCollections().map((collection) => collection.deleteMany()),
-    );
+    await db.drop();
 
     res.sendStatus(HttpStatus.NoContent);
   } catch {

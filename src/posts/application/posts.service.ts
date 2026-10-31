@@ -1,67 +1,37 @@
-import { WithId } from 'mongodb';
-import { PostQueryInput } from '../routers/input/post-query.input';
 import { Post } from '../domain/post';
 import { postsRepository } from '../repositories/posts.repository';
-import { bloggersRepository } from '../../bloggers/repositories/bloggers.repository';
 import { NotFoundException } from '../../core/exceptions/not-found.exception';
-import {
-  PostInputDto,
-  PostInputDtoWithBlogId,
-} from '../routers/input/post-input.dto';
-import { mapPostInputDtoToPost } from '../routers/mappers/map-post-input-dto-to-post.util';
-import { mapQueryInput } from '../routers/mappers/map-query-input.util';
+import { PostCreateDto } from '../routers/input/post-create.dto';
+import { mapPostDtoToPost } from '../routers/mappers/map-post-dto-to-post.util';
+import { PostUpdateDto } from '../routers/input/post-update.dto';
+import { blogsRepository } from '../../blogs/repositories/blogs.repository';
 
 export const postsService = {
-  async findMany(
-    queryInput: PostQueryInput,
-    blogId?: string,
-  ): Promise<{ items: WithId<Post>[]; totalCount: number }> {
-    if (blogId) {
-      const blogger = await bloggersRepository.findById(blogId);
+  async create(blogId: string, dto: PostCreateDto): Promise<string> {
+    const blog = await blogsRepository.findById(blogId);
 
-      if (!blogger) {
-        throw new NotFoundException('Blogger not exist');
-      }
-    }
-
-    return postsRepository.findMany(mapQueryInput(queryInput), blogId);
-  },
-
-  async findById(id: string): Promise<WithId<Post>> {
-    const post = await postsRepository.findById(id);
-
-    if (!post) {
-      throw new NotFoundException('Post not exist');
-    }
-
-    return post;
-  },
-
-  async create(blogId: string, inputDto: PostInputDto): Promise<WithId<Post>> {
-    const blogger = await bloggersRepository.findById(blogId);
-
-    if (!blogger) {
-      throw new NotFoundException('Blogger not exist');
+    if (!blog) {
+      throw new NotFoundException('Blog not exist');
     }
 
     const newPost: Post = {
-      ...mapPostInputDtoToPost(inputDto, blogger),
+      ...mapPostDtoToPost(dto, blog),
       createdAt: new Date(),
     };
 
     return postsRepository.create(newPost);
   },
 
-  async update(id: string, inputDto: PostInputDtoWithBlogId): Promise<void> {
-    const blogger = await bloggersRepository.findById(inputDto.blogId);
+  async update(id: string, dto: PostUpdateDto): Promise<void> {
+    const blog = await blogsRepository.findById(dto.blogId);
 
-    if (!blogger) {
-      throw new NotFoundException('Blogger not exist');
+    if (!blog) {
+      throw new NotFoundException('Blog not exist');
     }
 
     const isUpdated = await postsRepository.update(
       id,
-      mapPostInputDtoToPost(inputDto, blogger),
+      mapPostDtoToPost(dto, blog),
     );
 
     if (!isUpdated) {

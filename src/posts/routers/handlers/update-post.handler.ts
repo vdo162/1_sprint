@@ -1,13 +1,12 @@
 import { Request, Response } from 'express';
 import { HttpStatus } from '../../../core/types/http-statuses';
-import { PostInputDtoWithBlogId } from '../input/post-input.dto';
-import { Unsanitized } from '../../../core/types/unsanitized.input';
 import { mapUpdatePostInputToDto } from '../mappers/map-post-input-to-dto.util';
 import { postsService } from '../../application/posts.service';
 import { errorsHandler } from '../../../core/exceptions/errors.handler';
+import { PostUpdateInput } from '../input/post-update.dto';
 
 export async function updatePostHandler(
-  req: Request<{ id: string }, {}, Unsanitized<PostInputDtoWithBlogId>>,
+  req: Request<{ id: string }, {}, PostUpdateInput>,
   res: Response,
 ) {
   try {

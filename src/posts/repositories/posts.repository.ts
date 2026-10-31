@@ -1,44 +1,26 @@
 import { Post } from '../domain/post';
-import { postCollection } from '../../db/collections';
-import { ObjectId, WithId } from 'mongodb';
-import { MappedPostQueryInput } from '../routers/input/post-query.input';
+import { ObjectId } from 'mongodb';
+import { db } from '../../db';
+import { PostOutput } from '../routers/output/post.output';
+import { mapToPostOutput } from '../routers/mappers/map-to-post-output.util';
 
 export const postsRepository = {
-  async findMany(
-    queryInput: MappedPostQueryInput,
-    blogId?: string,
-  ): Promise<{ items: WithId<Post>[]; totalCount: number }> {
-    const { pageNumber, pageSize, sortBy, sortDirection } = queryInput;
-    console.log({ queryInput });
-    let filter = {};
-    if (blogId) {
-      filter = { 'blog.id': blogId };
-    }
-    const skip = (pageNumber - 1) * pageSize;
-
-    const [items, totalCount] = await Promise.all([
-      postCollection
-        .find(filter)
-        .sort({ [sortBy]: sortDirection })
-        .skip(skip)
-        .limit(pageSize)
-        .toArray(),
-      postCollection.countDocuments(filter),
-    ]);
-    return { items, totalCount };
+  async findById(id: string): Promise<PostOutput | null> {
+    const post = await db.collections.postsCollection.findOne({
+      _id: new ObjectId(id),
+    });
+    return post ? mapToPostOutput(post) : null;
   },
 
-  async findById(id: string): Promise<WithId<Post> | null> {
-    return postCollection.findOne({ _id: new ObjectId(id) });
-  },
+  async create(newPost: Post): Promise<string> {
+    const insertResult =
+      await db.collections.postsCollection.insertOne(newPost);
 
-  async create(newPost: Post): Promise<WithId<Post>> {
-    const insertResult = await postCollection.insertOne(newPost);
-    return { ...newPost, _id: insertResult.insertedId };
+    return insertResult.insertedId.toString();
   },
 
   async update(id: string, post: Omit<Post, 'createdAt'>): Promise<boolean> {
-    const updateResult = await postCollection.updateOne(
+    const updateResult = await db.collections.postsCollection.updateOne(
       { _id: new ObjectId(id) },
       { $set: post },
     );
@@ -47,7 +29,7 @@ export const postsRepository = {
   },
 
   async delete(id: string): Promise<boolean> {
-    const deleteResult = await postCollection.deleteOne({
+    const deleteResult = await db.collections.postsCollection.deleteOne({
       _id: new ObjectId(id),
     });
 

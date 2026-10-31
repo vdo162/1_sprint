@@ -4,7 +4,7 @@ export function mapToPaginatedOutput<TItem, TData>(
   items: TItem[],
   meta: { pageNumber: number; pageSize: number; totalCount: number },
   mapItem: (item: TItem) => TData,
-): PaginatedOutput & { items: TData[] } {
+): PaginatedOutput<TData[]> {
   return {
     pagesCount: Math.ceil(meta.totalCount / meta.pageSize),
     page: meta.pageNumber,
