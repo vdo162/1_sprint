@@ -12,6 +12,11 @@ import { paginationAndSortingValidation } from '../../core/middlewares/validatio
 import { sanitizeQueryParams } from '../../core/middlewares/validation/sanitize-query.middleware';
 import { PostSortField } from './input/post-sort-field';
 import { postInputValidation } from '../validation/post.input.validation-middlewares';
+import { CommentSortField } from '../../comments/routers/input/comment-sort-field';
+import { getPostCommentListHandler } from './handlers/get-post-comment-list.handler';
+import { accessTokenGuardMiddleware } from '../../auth/middlewares/access-token.guard.middleware';
+import { commentInputValidation } from '../../comments/validation/comment.input.validation-middlewares';
+import { createPostCommentHandler } from './handlers/create-post-comment.handler';
 
 export const postsRouter = Router({});
 
@@ -54,4 +59,21 @@ postsRouter
     idValidation,
     inputValidationResultMiddleware,
     deletePostHandler,
+  )
+
+  .get(
+    POSTS_ROUTES.POST_COMMENTS,
+    idValidation,
+    paginationAndSortingValidation(CommentSortField),
+    inputValidationResultMiddleware,
+    sanitizeQueryParams,
+    getPostCommentListHandler as unknown as RequestHandler,
+  )
+
+  .post(
+    POSTS_ROUTES.POST_COMMENTS,
+    accessTokenGuardMiddleware,
+    commentInputValidation,
+    inputValidationResultMiddleware,
+    createPostCommentHandler,
   );

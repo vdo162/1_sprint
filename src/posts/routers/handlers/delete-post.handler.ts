@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { HttpStatus } from '../../../core/types/http-statuses';
 import { postsService } from '../../application/posts.service';
-import { errorsHandler } from '../../../core/exceptions/errors.handler';
+import { ResultStatus } from '../../../core/result/result';
+import { sendErrorResult } from '../../../core/result/send-error-result';
 
 export async function deletePostHandler(
   req: Request<{ id: string }>,
@@ -10,10 +11,16 @@ export async function deletePostHandler(
   try {
     const id = req.params.id;
 
-    await postsService.delete(id);
+    const result = await postsService.delete(id);
+
+    if (result.status !== ResultStatus.Success) {
+      sendErrorResult(result, res);
+      return;
+    }
 
     res.sendStatus(HttpStatus.NoContent);
   } catch (e: unknown) {
-    errorsHandler(e, res);
+    res.sendStatus(HttpStatus.InternalServerError);
+    console.error(e);
   }
 }

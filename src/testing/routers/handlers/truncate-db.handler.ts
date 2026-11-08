@@ -7,7 +7,8 @@ export async function truncateDbHandler(req: Request, res: Response) {
     await db.drop();
 
     res.sendStatus(HttpStatus.NoContent);
-  } catch {
+  } catch (e: unknown) {
     res.sendStatus(HttpStatus.InternalServerError);
+    console.error(e);
   }
 }

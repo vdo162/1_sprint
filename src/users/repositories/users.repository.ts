@@ -3,6 +3,12 @@ import { ObjectId, WithId } from 'mongodb';
 import { db } from '../../db';
 
 export const usersRepository = {
+  async findById(id: string): Promise<WithId<User> | null> {
+    return await db.collections.usersCollection.findOne({
+      _id: new ObjectId(id),
+    });
+  },
+
   async create(newUser: User): Promise<string> {
     const insertResult =
       await db.collections.usersCollection.insertOne(newUser);

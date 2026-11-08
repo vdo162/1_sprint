@@ -3,6 +3,7 @@ import { SETTINGS } from './settings/config';
 import { Blog } from './blogs/domain/blog';
 import { Post } from './posts/domain/post';
 import { User } from './users/domain/user';
+import { Comment } from './comments/domain/comment';
 
 const jestAdapter = {
   runtimeAdapters: {
@@ -14,12 +15,14 @@ enum COLLECTION_NAME {
   USER = 'users',
   BLOG = 'blogs',
   POST = 'posts',
+  COMMENT = 'comments',
 }
 
 type Collections = {
   usersCollection: Collection<User>;
   blogsCollection: Collection<Blog>;
   postsCollection: Collection<Post>;
+  commentsCollection: Collection<Comment>;
 };
 
 export const db = {
@@ -70,6 +73,9 @@ export const db = {
       usersCollection: this.clientDb.collection<User>(COLLECTION_NAME.USER),
       blogsCollection: this.clientDb.collection<Blog>(COLLECTION_NAME.BLOG),
       postsCollection: this.clientDb.collection<Post>(COLLECTION_NAME.POST),
+      commentsCollection: this.clientDb.collection<Comment>(
+        COLLECTION_NAME.COMMENT,
+      ),
     };
   },
 };

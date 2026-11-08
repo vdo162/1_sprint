@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { errorsHandler } from '../../../core/exceptions/errors.handler';
 import { PostQueryParams } from '../../../posts/routers/input/post-query-params';
 import { HttpStatus } from '../../../core/types/http-statuses';
 import { postsQueryRepository } from '../../../posts/repositories/posts.query.repository';
-import { NotFoundException } from '../../../core/exceptions/not-found.exception';
 import { blogsQueryRepository } from '../../repositories/blogs.query.repository';
 import { mapPostsQueryParams } from '../../../posts/routers/mappers/map-posts-query-params.util';
+import { sendErrorResult } from '../../../core/result/send-error-result';
+import { notFoundResult } from '../../../core/result/result';
 
 export async function getBlogPostListHandler(
   req: Request<{ id: string }, {}, {}, PostQueryParams>,
@@ -18,7 +18,8 @@ export async function getBlogPostListHandler(
     const blog = await blogsQueryRepository.findById(blogId);
 
     if (!blog) {
-      throw new NotFoundException('Blog not exist');
+      sendErrorResult(notFoundResult('Blog not exist'), res);
+      return;
     }
 
     const posts = await postsQueryRepository.findMany(
@@ -28,6 +29,7 @@ export async function getBlogPostListHandler(
 
     res.status(HttpStatus.Ok).send(posts);
   } catch (e: unknown) {
-    errorsHandler(e, res);
+    res.sendStatus(HttpStatus.InternalServerError);
+    console.error(e);
   }
 }

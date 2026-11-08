@@ -7,6 +7,7 @@ export enum ResultStatus {
   NotFound = 'NotFound',
   DomainRuleViolation = 'DomainRuleViolation',
   Unauthorized = 'Unauthorized',
+  Forbidden = 'Forbidden',
 }
 
 // Соответствие статуса результата HTTP-коду.
@@ -15,6 +16,7 @@ export const resultStatusToHttp: Record<ResultStatus, HttpStatus> = {
   [ResultStatus.NotFound]: HttpStatus.NotFound,
   [ResultStatus.DomainRuleViolation]: HttpStatus.UnprocessableEntity,
   [ResultStatus.Unauthorized]: HttpStatus.Unauthorized,
+  [ResultStatus.Forbidden]: HttpStatus.Forbidden,
 };
 
 export type ResultError = {
@@ -57,6 +59,12 @@ export const domainResult = <T = null>(
 
 export const unauthorizedResult = <T = null>(detail: string): Result<T> => ({
   status: ResultStatus.Unauthorized,
+  data: null as T,
+  errors: [{ detail }],
+});
+
+export const forbiddenResult = <T = null>(detail: string): Result<T> => ({
+  status: ResultStatus.Forbidden,
   data: null as T,
   errors: [{ detail }],
 });

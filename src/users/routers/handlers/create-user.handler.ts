@@ -22,7 +22,8 @@ export async function createUserHandler(
     const createdUser = await usersQueryRepository.findById(result.data);
 
     res.status(HttpStatus.Created).send(createdUser);
-  } catch {
+  } catch (e: unknown) {
     res.sendStatus(HttpStatus.InternalServerError);
+    console.error(e);
   }
 }

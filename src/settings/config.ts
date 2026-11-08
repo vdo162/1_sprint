@@ -10,4 +10,8 @@ export const SETTINGS = {
     LOGIN: env.ADMIN_LOGIN || 'admin',
     PASSWORD: env.ADMIN_PASSWORD || 'qwerty',
   },
+  AC: {
+    SECRET: env.AC_SECRET || 'f1f5deg4hy5fr5d5g',
+    TIME: env.AC_TIME || '5m',
+  },
 };

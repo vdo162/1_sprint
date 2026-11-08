@@ -2,9 +2,10 @@ import { Request, Response } from 'express';
 import { HttpStatus } from '../../../core/types/http-statuses';
 import { postsService } from '../../application/posts.service';
 import { mapCreatePostInputToDto } from '../mappers/map-post-input-to-dto.util';
-import { errorsHandler } from '../../../core/exceptions/errors.handler';
 import { postsQueryRepository } from '../../repositories/posts.query.repository';
 import { PostCreateInput } from '../input/post-create.dto';
+import { ResultStatus } from '../../../core/result/result';
+import { sendErrorResult } from '../../../core/result/send-error-result';
 
 export async function createPostHandler(
   req: Request<{}, {}, PostCreateInput>,
@@ -13,15 +14,21 @@ export async function createPostHandler(
   try {
     const blogId = req.body.blogId;
 
-    const createdPostId = await postsService.create(
+    const result = await postsService.create(
       blogId,
       mapCreatePostInputToDto(req.body),
     );
 
-    const createdPost = await postsQueryRepository.findById(createdPostId);
+    if (result.status !== ResultStatus.Success) {
+      sendErrorResult(result, res);
+      return;
+    }
+
+    const createdPost = await postsQueryRepository.findById(result.data);
 
     res.status(HttpStatus.Created).send(createdPost);
   } catch (e: unknown) {
-    errorsHandler(e, res);
+    res.sendStatus(HttpStatus.InternalServerError);
+    console.error(e);
   }
 }

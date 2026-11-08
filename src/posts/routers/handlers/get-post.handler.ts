@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { errorsHandler } from '../../../core/exceptions/errors.handler';
 import { HttpStatus } from '../../../core/types/http-statuses';
 import { postsQueryRepository } from '../../repositories/posts.query.repository';
-import { NotFoundException } from '../../../core/exceptions/not-found.exception';
+import { notFoundResult } from '../../../core/result/result';
+import { sendErrorResult } from '../../../core/result/send-error-result';
 
 export async function getPostHandler(
   req: Request<{ id: string }>,
@@ -14,11 +14,13 @@ export async function getPostHandler(
     const post = await postsQueryRepository.findById(id);
 
     if (!post) {
-      throw new NotFoundException('Post not exist');
+      sendErrorResult(notFoundResult('Post not exist'), res);
+      return;
     }
 
     res.status(HttpStatus.Ok).send(post);
   } catch (e: unknown) {
-    errorsHandler(e, res);
+    res.sendStatus(HttpStatus.InternalServerError);
+    console.error(e);
   }
 }

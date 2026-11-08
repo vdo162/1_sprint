@@ -1,15 +1,12 @@
 import { Post } from '../domain/post';
-import { ObjectId } from 'mongodb';
+import { ObjectId, WithId } from 'mongodb';
 import { db } from '../../db';
-import { PostOutput } from '../routers/output/post.output';
-import { mapToPostOutput } from '../routers/mappers/map-to-post-output.util';
 
 export const postsRepository = {
-  async findById(id: string): Promise<PostOutput | null> {
-    const post = await db.collections.postsCollection.findOne({
+  async findById(id: string): Promise<WithId<Post> | null> {
+    return db.collections.postsCollection.findOne({
       _id: new ObjectId(id),
     });
-    return post ? mapToPostOutput(post) : null;
   },
 
   async create(newPost: Post): Promise<string> {

@@ -13,13 +13,15 @@ export async function loginUserHandler(
     const { loginOrEmail, password } = req.body;
 
     const result = await authService.loginUser(loginOrEmail, password);
+
     if (result.status !== ResultStatus.Success) {
       sendErrorResult(result, res);
       return;
     }
 
-    res.sendStatus(HttpStatus.NoContent);
-  } catch {
+    res.status(HttpStatus.Ok).send({ accessToken: result.data.accessToken });
+  } catch (e: unknown) {
     res.sendStatus(HttpStatus.InternalServerError);
+    console.error(e);
   }
 }

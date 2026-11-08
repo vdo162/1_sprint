@@ -1,15 +1,12 @@
 import { Blog } from '../domain/blog';
-import { ObjectId } from 'mongodb';
+import { ObjectId, WithId } from 'mongodb';
 import { db } from '../../db';
-import { BlogOutput } from '../routers/output/blog.output';
-import { mapToBlogOutput } from '../routers/mappers/map-to-blog-output.util';
 
 export const blogsRepository = {
-  async findById(id: string): Promise<BlogOutput | null> {
-    const blog = await db.collections.blogsCollection.findOne({
+  async findById(id: string): Promise<WithId<Blog> | null> {
+    return db.collections.blogsCollection.findOne({
       _id: new ObjectId(id),
     });
-    return blog ? mapToBlogOutput(blog) : null;
   },
 
   async create(newBlog: Blog): Promise<string> {

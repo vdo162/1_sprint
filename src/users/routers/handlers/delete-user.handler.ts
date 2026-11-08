@@ -19,7 +19,8 @@ export async function deleteUserHandler(
     }
 
     res.sendStatus(HttpStatus.NoContent);
-  } catch {
+  } catch (e: unknown) {
     res.sendStatus(HttpStatus.InternalServerError);
+    console.error(e);
   }
 }

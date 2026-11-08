@@ -16,6 +16,7 @@ export const usersRouter = Router({});
 usersRouter
   .get(
     USERS_ROUTES.ROOT,
+    superAdminGuardMiddleware,
     paginationAndSortingValidation(UserSortField),
     inputValidationResultMiddleware,
     sanitizeQueryParams,

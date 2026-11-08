@@ -1,17 +1,21 @@
 import { Post } from '../domain/post';
 import { postsRepository } from '../repositories/posts.repository';
-import { NotFoundException } from '../../core/exceptions/not-found.exception';
 import { PostCreateDto } from '../routers/input/post-create.dto';
 import { mapPostDtoToPost } from '../routers/mappers/map-post-dto-to-post.util';
 import { PostUpdateDto } from '../routers/input/post-update.dto';
 import { blogsRepository } from '../../blogs/repositories/blogs.repository';
+import {
+  notFoundResult,
+  Result,
+  successResult,
+} from '../../core/result/result';
 
 export const postsService = {
-  async create(blogId: string, dto: PostCreateDto): Promise<string> {
+  async create(blogId: string, dto: PostCreateDto): Promise<Result<string>> {
     const blog = await blogsRepository.findById(blogId);
 
     if (!blog) {
-      throw new NotFoundException('Blog not exist');
+      return notFoundResult('Blog not exist');
     }
 
     const newPost: Post = {
@@ -19,14 +23,16 @@ export const postsService = {
       createdAt: new Date(),
     };
 
-    return postsRepository.create(newPost);
+    const createdPostId = await postsRepository.create(newPost);
+
+    return successResult(createdPostId);
   },
 
-  async update(id: string, dto: PostUpdateDto): Promise<void> {
+  async update(id: string, dto: PostUpdateDto): Promise<Result> {
     const blog = await blogsRepository.findById(dto.blogId);
 
     if (!blog) {
-      throw new NotFoundException('Blog not exist');
+      return notFoundResult('Blog not exist');
     }
 
     const isUpdated = await postsRepository.update(
@@ -35,19 +41,19 @@ export const postsService = {
     );
 
     if (!isUpdated) {
-      throw new NotFoundException('Post not exist');
+      return notFoundResult('Post not exist');
     }
 
-    return;
+    return successResult(null);
   },
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string): Promise<Result> {
     const isDeleted = await postsRepository.delete(id);
 
     if (!isDeleted) {
-      throw new NotFoundException('Post not exist');
+      return notFoundResult('Post not exist');
     }
 
-    return;
+    return successResult(null);
   },
 };

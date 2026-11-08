@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { BlogQueryParams } from '../input/blog-query-params';
-import { errorsHandler } from '../../../core/exceptions/errors.handler';
 import { HttpStatus } from '../../../core/types/http-statuses';
 import { blogsQueryRepository } from '../../repositories/blogs.query.repository';
 
@@ -15,6 +14,7 @@ export async function getBlogListHandler(
 
     res.status(HttpStatus.Ok).send(blogs);
   } catch (e: unknown) {
-    errorsHandler(e, res);
+    res.sendStatus(HttpStatus.InternalServerError);
+    console.error(e);
   }
 }
