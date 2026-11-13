@@ -14,4 +14,8 @@ export const SETTINGS = {
     SECRET: env.AC_SECRET || 'f1f5deg4hy5fr5d5g',
     TIME: env.AC_TIME || '5m',
   },
+  SMTP: {
+    EMAIL: process.env.SMTP_EMAIL || '',
+    EMAIL_PASSWORD: process.env.SMTP_EMAIL_PASSWORD || '',
+  },
 };

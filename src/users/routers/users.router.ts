@@ -9,7 +9,7 @@ import { UserSortField } from './input/user-sort-field';
 import { sanitizeQueryParams } from '../../core/middlewares/validation/sanitize-query.middleware';
 import { superAdminGuardMiddleware } from '../../auth/middlewares/super-admin.guard.middleware';
 import { USERS_ROUTES } from '../constants/users.paths';
-import { userInputValidation } from '../validation/user.input.validation-middlewares';
+import { userInputValidation } from '../../core/middlewares/validation/user-registration.validation.middlewares';
 
 export const usersRouter = Router({});
 

@@ -5,6 +5,7 @@ import { HttpStatus } from '../types/http-statuses';
 export enum ResultStatus {
   Success = 'Success',
   NotFound = 'NotFound',
+  BadRequest = 'BadRequest',
   DomainRuleViolation = 'DomainRuleViolation',
   Unauthorized = 'Unauthorized',
   Forbidden = 'Forbidden',
@@ -14,6 +15,7 @@ export enum ResultStatus {
 export const resultStatusToHttp: Record<ResultStatus, HttpStatus> = {
   [ResultStatus.Success]: HttpStatus.Ok,
   [ResultStatus.NotFound]: HttpStatus.NotFound,
+  [ResultStatus.BadRequest]: HttpStatus.BadRequest,
   [ResultStatus.DomainRuleViolation]: HttpStatus.UnprocessableEntity,
   [ResultStatus.Unauthorized]: HttpStatus.Unauthorized,
   [ResultStatus.Forbidden]: HttpStatus.Forbidden,
@@ -47,14 +49,22 @@ export const notFoundResult = <T = null>(detail: string): Result<T> => ({
   errors: [{ detail }],
 });
 
+export const badRequestResult = <T = null>(
+  detail: string,
+  source?: string,
+): Result<T> => ({
+  status: ResultStatus.BadRequest,
+  data: null as T,
+  errors: [{ detail, source }],
+});
+
 export const domainResult = <T = null>(
   detail: string,
-  code: string,
   source?: string,
 ): Result<T> => ({
   status: ResultStatus.DomainRuleViolation,
   data: null as T,
-  errors: [{ detail, code, source }],
+  errors: [{ detail, source }],
 });
 
 export const unauthorizedResult = <T = null>(detail: string): Result<T> => ({

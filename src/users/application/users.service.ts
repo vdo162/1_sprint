@@ -8,7 +8,6 @@ import {
   Result,
   successResult,
 } from '../../core/result/result';
-import { UserErrorCode } from '../enums/domain.codes';
 
 export const usersService = {
   async create(dto: UserDto): Promise<Result<string>> {
@@ -16,29 +15,30 @@ export const usersService = {
 
     const userByLogin = await usersRepository.findByLoginOrEmail(login);
     if (userByLogin) {
-      return domainResult(
-        `login already exist`,
-        UserErrorCode.LoginAlreadyExists,
-        'login',
-      );
+      return domainResult(`login already exist`, 'login');
     }
 
     const userByEmail = await usersRepository.findByLoginOrEmail(email);
     if (userByEmail) {
-      return domainResult(
-        `email already exist`,
-        UserErrorCode.EmailAlreadyExists,
-        'email',
-      );
+      return domainResult(`email already exist`, 'email');
     }
 
     const passwordHash = await bcryptService.generateHash(password);
+
+    const createdAt = new Date();
+
     const newUser: User = {
       login,
       email,
       passwordHash,
-      createdAt: new Date(),
+      createdAt,
+      emailConfirmation: {
+        expirationDate: createdAt,
+        confirmationCode: '',
+        isConfirmed: true,
+      },
     };
+
     const createdUserId = await usersRepository.create(newUser);
 
     return successResult(createdUserId);

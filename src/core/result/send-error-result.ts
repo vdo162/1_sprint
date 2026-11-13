@@ -9,7 +9,7 @@ export function sendErrorResult(result: Result<unknown>, res: Response): void {
     createErrorsMessages(
       (result.errors ?? []).map((error) => ({
         field: error.source || '',
-        message: error.code ? `${error.code}: ${error.detail}` : error.detail,
+        message: error.detail,
       })),
     ),
   );
